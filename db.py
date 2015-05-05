@@ -64,20 +64,20 @@ class Db(object):
 
     def select_courses(self, regex=None):
         c = self.conn.cursor()
-        if regex:
-            c.execute('''SELECT * FROM course WHERE cId LIKE :r OR libelle LIKE :r''', {'r': '%' + regex + '%'})
-        else:
+        if not regex:
             c.execute('''SELECT * FROM course''')
+        else:
+            c.execute('''SELECT * FROM course WHERE cId LIKE :r OR libelle LIKE :r''', {'r': '%' + regex + '%'})
 
         return c.fetchall()
 
     def select_my_courses(self, regex=None):
         c = self.conn.cursor()
         request = '''SELECT * FROM course INNER JOIN mycourses WHERE course.cId = mycourses.cId'''
-        if regex:
-            request += ''' AND cId LIKE :r OR libelle LIKE :r''', {'r': '%' + regex + '%'}
-        
-        c.execute(request)
+        if not regex:
+            c.execute(request)
+        else:
+            c.execute((request + ''' AND (course.cId LIKE :r OR course.libelle LIKE :r)'''), {'r': '%' + regex + '%'})
 
         return c.fetchall()
 
